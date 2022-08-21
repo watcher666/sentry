@@ -1,0 +1,15 @@
+---
+processing:
+  enabled: true
+  kafka_config:
+    -
+      name: bootstrap.servers
+      value: "kafka.s8.ru:9092"
+    -
+      name: message.max.bytes
+      value: 50000000
+  redis: "redis://:12345678@prod-sentry-db-1.web.s8.ru:6379"
+relay:
+  host: "0.0.0.0"
+  port: 3000
+  upstream: "http://sentry-nginx-svc:80/"

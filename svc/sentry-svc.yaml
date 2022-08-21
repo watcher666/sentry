@@ -1,0 +1,193 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentry-ingest-consumer-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+  selector:
+    app: sentry-ingest-consumer
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memcached-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 11211
+      protocol: TCP
+      targetPort: 11211
+  clusterIP: None
+  selector:
+    app: sentry-memcached
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentry-nginx-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: sentry-nginx
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentry-post-process-forwarder-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+  selector:
+    app: sentry-post-process-forwarder
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentry-relay-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app: sentry-relay
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shuba-api-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 1218
+      protocol: TCP
+      targetPort: 1218
+  selector:
+    app: sentry-shuba-api
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shuba-consumer-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 1218
+      protocol: TCP
+      targetPort: 1218
+  selector:
+    app: sentry-shuba-consumer
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shuba-outcomes-consumer-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 1218
+      protocol: TCP
+      targetPort: 1218
+  selector:
+    app: sentry-shuba-outcomes-consumer
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shuba-replacer-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 1218
+      protocol: TCP
+      targetPort: 1218
+  selector:
+    app: sentry-shuba-replacer
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shuba-transactions-consumer-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 1218
+      protocol: TCP
+      targetPort: 1218
+  selector:
+    app: sentry-shuba-transactions-consumer
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentry-web-svc
+  namespace: wsp-sentry
+spec:
+  ports:
+    - name: tcp
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+  selector:
+    app: sentry-web
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP

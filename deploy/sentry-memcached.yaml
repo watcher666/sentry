@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentry-memcached
+  namespace: wsp-sentry
+  labels:
+    app: sentry-memcached
+spec:
+  selector:
+    matchLabels:
+        app: sentry-memcached
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sentry-memcached
+    spec:
+      containers:
+      - name: sentry-memcached
+        image: "srv:7018/wsp_sentry:mem"
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 11211
+        env:
+          - name: MEMCACHED_MAX_ITEM_SIZE
+            value: '8388608'
+          - name: MEMCACHED_THREADS
+            value: '2'
+          - name: MEMCACHED_MAX_CONNECTIONS
+            value: '2000'
+        resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: "0.2"
+              memory: 201Mi

@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentry-relay
+  namespace: wsp-sentry
+  labels:
+    app: senry-relay
+spec:
+  selector:
+    matchLabels:
+        app: sentry-relay
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sentry-relay
+    spec:
+      containers:
+      - name: sentry-relay
+        image: "srv:7018/wsp_sentry:relay"
+        imagePullPolicy: IfNotPresent
+        command:
+          - "relay"
+        args:
+          - run
+        ports:
+          - containerPort: 3000
+        env:
+          - name: SENTRY_REDIS_HOST
+            value: 'prod-sentry-db-1.web.s8.ru'
+          - name: SENTRY_REDIS_PASSWORD
+            value: '12345678'
+          - name: SENTRY_MEMCACHED_HOST
+            value: memcached-svc
+          - name: UWSGI_MAX_REQUESTS
+            value: '10000'
+          - name: UWSGI_DISABLE_LOGGING
+            value: 'true'
+          - name: SENTRY_SECRET_KEY
+            value: "secret_key"
+          - name: SENTRY_CONF
+            value: '/etc/sentry'
+          - name: SENTRY_FILESTORE_DIR
+            value: '/data/files'
+          - name: SENTRY_POSTGRES_HOST
+            value: 'prod-m1-postgre-site-1.web.s8.ru'
+          - name: SENTRY_POSTGRES_PORT
+            value: '5432'
+          - name: SENTRY_DB_NAME
+            value: 'wsp-sentry'
+          - name: SENTRY_DB_USER
+            value: 'wsp-sentry'
+          - name: SENTRY_DB_PASSWORD
+            value: '12345678'
+          - name: SNUBA
+            value: 'http://shuba-api-svc:1218'
+        volumeMounts:
+        - name: config
+          mountPath: /work/.relay
+        - name: config
+          mountPath: /work/.relay/config.yml
+          subPath: config.yml
+        - mountPath: /data
+          name: data
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4Gi
+          requests:
+            cpu: "0.5"
+            memory: 511Mi
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: relay-data
+      - name: data
+        persistentVolumeClaim:
+          claimName: sentry-data

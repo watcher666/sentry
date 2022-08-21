@@ -1,0 +1,79 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+    name: sentry-cleanup-cronjob
+spec:
+  schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      completions: 1
+      template:
+        metadata:
+          labels:
+            app: sentry-cleanup-cronjob
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: sentry-cleanup-cronjob
+            image: "srv:7018/wsp_sentry:sentry"
+            imagePullPolicy: IfNotPresent
+            command:
+              - "/usr/local/bin/sentry"
+            args:
+              - "cleanup"
+              - "--days"
+              - "10"
+            env:
+              - name: C_FORCE_ROOT
+                value: 'true'
+              - name: SNUBA
+                value: 'http://shuba-api-svc:1218'
+              - name: SENTRY_REDIS_HOST
+                value: 'prod-sentry-db-1.web.s8.ru'
+              - name: SENTRY_REDIS_PASSWORD
+                value: '12345678'
+              - name: SENTRY_MEMCACHED_HOST
+                value: memcached-svc
+              - name: UWSGI_MAX_REQUESTS
+                value: '10000'
+              - name: UWSGI_DISABLE_LOGGING
+                value: 'true'
+              - name: SENTRY_SECRET_KEY
+                value: "secret_key"
+              - name: SENTRY_CONF
+                value: '/etc/sentry'
+              - name: SENTRY_FILESTORE_DIR
+                value: '/data/files'
+              - name: SENTRY_POSTGRES_HOST
+                value: 'prod-m1-postgre-site-1.web.s8.ru'
+              - name: SENTRY_POSTGRES_PORT
+                value: '5432'
+              - name: SENTRY_DB_NAME
+                value: 'wsp-sentry'
+              - name: SENTRY_DB_USER
+                value: 'wsp-sentry'
+              - name: SENTRY_DB_PASSWORD
+                value: '12345678'
+            volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /etc/sentry
+              name: config
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 1024Mi
+              requests:
+                cpu: 150m
+                memory: 150Mi
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: sentry-data
+          - name: config
+            persistentVolumeClaim:
+              claimName: sentry-conf

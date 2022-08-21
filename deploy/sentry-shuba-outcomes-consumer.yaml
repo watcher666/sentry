@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentry-shuba-outcomes-consumer
+  namespace: wsp-sentry
+  labels:
+    app: sentry-shuba-outcomes-consumer
+spec:
+  selector:
+    matchLabels:
+        app: sentry-shuba-outcomes-consumer
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sentry-shuba-outcomes-consumer
+    spec:
+      containers:
+      - name: sentry-shuba-outcomes-consumer
+        image: "srv:7018/wsp_sentry:shuba"
+        imagePullPolicy: IfNotPresent
+        command:
+            - "/usr/local/bin/snuba"
+        args:
+          - consumer
+          - '--storage'
+          - outcomes_raw
+          - '--auto-offset-reset=earliest'
+          - '--max-batch-time-ms'
+          - '750'
+        ports:
+        - containerPort: 1218
+        env:
+          - name: REDIS_HOST
+            value: 'prod-sentry-db-1.web.s8.ru'
+          - name: REDIS_PASSWORD
+            value: '12345678'
+          - name: UWSGI_MAX_REQUESTS
+            value: '10000'
+          - name: UWSGI_DISABLE_LOGGING
+            value: 'true'
+          - name: CLICKHOUSE_HOST
+            value: 'prod-sentry-db-1.web.s8.ru'
+          - name: CLICKHOUSE_DATABASE
+            value: 'wsp_sentry'
+          - name: CLICKHOUSE_USER
+            value: 'wsp_sentry'
+          - name: CLICKHOUSE_PASSWORD
+            value: '12345678'
+          - name: DEFAULT_BROKERS
+            value: kafka.s8.ru:9092
+        resources:
+            limits:
+              cpu: "4"
+              memory: 4Gi
+            requests:
+              cpu: "0.5"
+              memory: 512Mi

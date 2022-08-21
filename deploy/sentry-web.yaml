@@ -1,0 +1,89 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentry-web
+  namespace: wsp-sentry
+  labels:
+    app: sentry-web
+spec:
+  selector:
+    matchLabels:
+        app: sentry-web
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sentry-web
+    spec:
+      containers:
+      - name: sentry-web
+        image: "srv:7018/wsp_sentry:sentry"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+        env:
+          - name: SENTRY_REDIS_HOST
+            value: 'prod-sentry-db-1.web.s8.ru'
+          - name: SENTRY_REDIS_PASSWORD
+            value: '12345678'
+          - name: SENTRY_MEMCACHED_HOST
+            value: memcached-svc
+          - name: UWSGI_MAX_REQUESTS
+            value: '10000'
+          - name: UWSGI_DISABLE_LOGGING
+            value: 'true'
+          - name: SENTRY_SECRET_KEY
+            value: "secret_key"
+          - name: SENTRY_CONF
+            value: '/etc/sentry'
+          - name: SENTRY_FILESTORE_DIR
+            value: '/data/files'
+          - name: SENTRY_POSTGRES_HOST
+            value: 'prod-m1-postgre-site-1.web.s8.ru'
+          - name: SENTRY_POSTGRES_PORT
+            value: '5432'
+          - name: SENTRY_DB_NAME
+            value: 'wsp-sentry'
+          - name: SENTRY_DB_USER
+            value: 'wsp-sentry'
+          - name: SENTRY_DB_PASSWORD
+            value: '12345678'
+          - name: SNUBA
+            value: 'http://shuba-api-svc:1218'
+        volumeMounts:
+        - mountPath: /etc/sentry
+          name: config
+        - mountPath: /data
+          name: data
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4Gi
+          requests:
+            cpu: "0.5"
+            memory: 511Mi
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          periodSeconds: 5
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          periodSeconds: 5
+          timeoutSeconds: 5
+        startupProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 10
+          failureThreshold: 15
+          periodSeconds: 5
+          timeoutSeconds: 10
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: sentry-conf
+      - name: data
+        persistentVolumeClaim:
+          claimName: sentry-data

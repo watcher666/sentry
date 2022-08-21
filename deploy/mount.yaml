@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mount
+  namespace: wsp-sentry
+spec:
+  containers:
+  - name: mount
+    image: srv:7018/wsp_sentry:mount
+    command: ['sleep', 'infinity']
+    volumeMounts:
+    - name: sentry-nginx
+      mountPath: /sentry-nginx
+    - name: sentry-conf
+      mountPath: /sentry-conf
+    - name: relay-data
+      mountPath: /relay-data
+    - name: sentry-data
+      mountPath: /sentry-data
+  volumes:
+  - name: sentry-nginx
+    persistentVolumeClaim:
+      claimName: sentry-nginx
+  - name: sentry-conf
+    persistentVolumeClaim:
+      claimName: sentry-conf
+  - name: relay-data
+    persistentVolumeClaim:
+      claimName: relay-data
+  - name: sentry-data
+    persistentVolumeClaim:
+      claimName: sentry-data

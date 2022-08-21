@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentry-nginx
+  namespace: wsp-sentry
+  labels:
+    app: senry-nginx
+spec:
+  selector:
+    matchLabels:
+        app: sentry-nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sentry-nginx
+    spec:
+      containers:
+      - name: sentry-nginx
+        image: "srv:7018/wsp_sentry:nginx"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx
+          name: config-nginx
+        resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: "0.2"
+              memory: 201Mi
+      volumes:
+      - name: config-nginx
+        persistentVolumeClaim:
+          claimName: sentry-nginx

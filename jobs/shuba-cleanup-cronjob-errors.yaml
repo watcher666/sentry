@@ -1,0 +1,57 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+    name: shuba-cleanup-cronjob-errors
+spec:
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      completions: 1
+      template:
+        metadata:
+          labels:
+            app: shuba-cleanup-cronjob-errors
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: shuba-cleanup-cronjob-errors
+            image: "srv:7018/wsp_sentry:shuba"
+            imagePullPolicy: IfNotPresent
+            command:
+                - "/usr/local/bin/snuba"
+            args:
+                - "cleanup"
+                - "--storage"
+                - "errors"
+                - "--dry-run"
+                - "False"
+            env:
+              - name: REDIS_HOST
+                value: 'prod-sentry-db-1.web.s8.ru'
+              - name: REDIS_PASSWORD
+                value: '12345678'
+              - name: UWSGI_MAX_REQUESTS
+                value: '10000'
+              - name: UWSGI_DISABLE_LOGGING
+                value: 'true'
+              - name: CLICKHOUSE_HOST
+                value: 'prod-sentry-db-1.web.s8.ru'
+              - name: CLICKHOUSE_DATABASE
+                value: 'wsp_sentry'
+              - name: CLICKHOUSE_USER
+                value: 'wsp_sentry'
+              - name: CLICKHOUSE_PASSWORD
+                value: '12345678'
+              - name: DEFAULT_BROKERS
+                value: kafka.s8.ru:9092
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 1024Mi
+              requests:
+                cpu: 150m
+                memory: 150Mi
